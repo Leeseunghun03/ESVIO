@@ -25,7 +25,9 @@ public:
 void init(int col, int row);
 void init(int col, int row, const double fx, const double fy, const double cx, const double cy);
 void createSAE_left(double et, int ex, int ey, bool ep);
+void createSAE_left_without_mc(double et, int ex, int ey, bool ep);
 void createSAE_right(double et_right, int ex_right, int ey_right, bool ep_right);
+void createSAE_right_without_mc(double et_right, int ex_right, int ey_right, bool ep_right);
 void createSAE_left(double et, int ex, int ey, bool ep, const Motion_correction_value measurements);
 void createSAE_right(double et_right, int ex_right, int ey_right, bool ep_right, const Motion_correction_value measurements);
 
@@ -42,6 +44,9 @@ double last_event_time;
 
 cv::Mat cur_event_mat_left;
 cv::Mat cur_event_mat_right;
+
+cv::Mat cur_event_mat_left_without_mc;
+cv::Mat cur_event_mat_right_without_mc;
 
 dvs_msgs::EventArray motion_correct_eventstream;
 

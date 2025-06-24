@@ -94,7 +94,7 @@ void pubTrackImage(const cv::Mat &imgTrack, const cv::Mat &imgTrack_two, const c
     if(!event_loop.empty())
     {
         sensor_msgs::ImagePtr event_loop_Msg = cv_bridge::CvImage(header, "bgr8", event_loop).toImageMsg();
-        pub_event_loop.publish(event_loop_Msg);//visulize the tracking result of single frame
+        pub_event_loop.publish(event_lpublishoop_Msg);//visulize the tracking result of single frame
     }
     
 }

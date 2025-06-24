@@ -623,10 +623,17 @@ void FeatureTracker::trackEvent(double _cur_time, const dvs_msgs::EventArray &ev
 
     detector.cur_event_mat_left = cv::Mat::zeros(cv::Size(COL_event, ROW_event), CV_8UC3);
     detector.cur_event_mat_right = cv::Mat::zeros(cv::Size(COL_event, ROW_event), CV_8UC3);
+
+    detector.cur_event_mat_left_without_mc = cv::Mat::zeros(cv::Size(COL_event, ROW_event), CV_8UC3);
+    detector.cur_event_mat_right_without_mc = cv::Mat::zeros(cv::Size(COL_event, ROW_event), CV_8UC3);
+
+    bool has_mc_event = false;
     
     for (const dvs_msgs::Event& e_left:event_left.events){
         if (dt > 0 && (e_left.ts.toSec() - correct_time_measurement.second.second.first[0])/dt < 1){
             detector.createSAE_left(e_left.ts.toSec(), e_left.x, e_left.y, e_left.polarity, correct_time_measurement);
+            // detector.createSAE_left(e_left.ts.toSec(), e_left.x, e_left.y, e_left.polarity);
+            has_mc_event = true;
         }else{
             detector.createSAE_left(e_left.ts.toSec(), e_left.x, e_left.y, e_left.polarity);
         }
@@ -635,6 +642,8 @@ void FeatureTracker::trackEvent(double _cur_time, const dvs_msgs::EventArray &ev
     for (const dvs_msgs::Event& e_right:event_right.events){
         if (dt > 0 && (e_right.ts.toSec() - correct_time_measurement.second.second.first[0])/dt < 1){
             detector.createSAE_right(e_right.ts.toSec(), e_right.x, e_right.y, e_right.polarity, correct_time_measurement);
+            // detector.createSAE_right(e_right.ts.toSec(), e_right.x, e_right.y, e_right.polarity);
+            has_mc_event = true;
         }else{
             detector.createSAE_right(e_right.ts.toSec(), e_right.x, e_right.y, e_right.polarity);
         }
@@ -642,6 +651,9 @@ void FeatureTracker::trackEvent(double _cur_time, const dvs_msgs::EventArray &ev
 
     cv::Mat event_mat_left = detector.cur_event_mat_left;
     cv::Mat event_mat_right = detector.cur_event_mat_right;
+
+    // cv::Mat event_mat_left_without_mc = detector.cur_event_mat_left_without_mc;
+    // cv::Mat event_mat_right_without_mc = detector.cur_event_mat_right_without_mc;
 
     const cv::Mat time_surface_map_left = detector.SAEtoTimeSurface_left(cur_time);
     const cv::Mat time_surface_map_right = detector.SAEtoTimeSurface_right(cur_time);
@@ -858,8 +870,13 @@ void FeatureTracker::trackEvent(double _cur_time, const dvs_msgs::EventArray &ev
 
     //////// Event Stereo ////////
 
+    static int frame_counter = 0;
+
     if(SHOW_TRACK){
         stereo_event_drawTrack(event_mat_left, event_mat_right, ids, cur_pts, cur_right_pts, prevLeftPtsMap);
+        // if(has_mc_event)
+        //     save_track_image(frame_counter);
+        // frame_counter++;
         stereo_event_loop(event_mat_left);
         event_drawTrack_two(cur_img_left, prev_img_left, ids, cur_pts, prev_pts, prevLeftPtsMap);
     }
@@ -1093,8 +1110,29 @@ void  FeatureTracker::event_drawTrack(const cv::Mat &imLeft, const cv::Mat &imRi
     }
 }
 
+void FeatureTracker::save_track_image(int frame_counter)
+{
+    std::string save_path = "/home/sh/sae_compare_2/";
 
-void  FeatureTracker::stereo_event_drawTrack(const cv::Mat &imLeft, const cv::Mat &imRight, 
+    if (frame_counter % 10 == 0) {
+        long long timestamp_usec = static_cast<long long>(cur_time * 1e6);
+
+        std::stringstream ss_with, ss_without;
+        // ss_with << save_path << "sae_left_with_mc_" 
+        //         << std::setfill('0') << std::setw(4) << frame_counter 
+        //         << "_" << timestamp_usec << ".png";
+
+        ss_without << save_path << "sae_left_without_mc_" 
+                   << std::setfill('0') << std::setw(4) << frame_counter 
+                   << "_" << timestamp_usec << ".png";
+
+        // cv::imwrite(ss_with.str(), imTrack);
+        cv::imwrite(ss_without.str(), imTrack);
+    }
+}
+
+
+void FeatureTracker::stereo_event_drawTrack(const cv::Mat &imLeft, const cv::Mat &imRight, 
                                vector<int> &curLeftIds,
                                vector<cv::Point2f> &curLeftPts, 
                                vector<cv::Point2f> &curRightPts,
@@ -1151,7 +1189,6 @@ void  FeatureTracker::stereo_event_drawTrack(const cv::Mat &imLeft, const cv::Ma
     }
 
 }
-
 
 void  FeatureTracker::stereo_event_loop(const cv::Mat &imLeft)
 {

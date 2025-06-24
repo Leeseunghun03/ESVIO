@@ -79,6 +79,8 @@ class FeatureTracker
                                    vector<cv::Point2f> &curRightPts,
                                    map<int, cv::Point2f> &prevLeftPtsMap);
 
+    void save_track_image(int frame_counter);
+
     void stereo_event_drawTrack(const cv::Mat &imLeft, const cv::Mat &imRight, 
                                    vector<int> &curLeftIds,
                                    vector<cv::Point2f> &curLeftPts, 
@@ -153,6 +155,7 @@ class FeatureTracker
 
     // some visulization parameters
     cv::Mat imTrack;
+    cv::Mat imTrack_without_mc;
     cv::Mat imTrack_loop;
     cv::Mat imTrack_two;
     cv::Mat time_surface_visualization_left;

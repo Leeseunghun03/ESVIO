@@ -165,6 +165,25 @@ void EventDetector::createSAE_left(double et, int ex, int ey, bool ep){
             ep == true ? cv::Vec3b(255, 0, 0) : cv::Vec3b(0, 0, 255));
 }
 
+void EventDetector::createSAE_left_without_mc(double et, int ex, int ey, bool ep){
+
+      // Update Surface of Active Events 
+      const int pol = ep ? 1 : 0;
+      const int pol_inv = (!ep) ? 1 : 0;
+      double & t_last = sae_latest_[pol](ex,ey);
+      double & t_last_inv = sae_latest_[pol_inv](ex, ey);
+
+      if ((et > t_last + filter_threshold_) || (t_last_inv > t_last) ) {
+        t_last = et;
+        sae_[pol](ex, ey) = et;
+      } else {
+        t_last = et;
+      }
+
+      cur_event_mat_left_without_mc.at<cv::Vec3b>(cv::Point(ex,ey)) = (
+            ep == true ? cv::Vec3b(255, 0, 0) : cv::Vec3b(0, 0, 255));
+}
+
 void EventDetector::createSAE_right(double et_right, int ex_right, int ey_right, bool ep_right, const Motion_correction_value measurements){
 
       const double const_et_right=et_right;
@@ -224,6 +243,24 @@ void EventDetector::createSAE_right(double et_right, int ex_right, int ey_right,
       }
 
       cur_event_mat_right.at<cv::Vec3b>(cv::Point(ex_right, ey_right)) = (
+            ep_right == true ? cv::Vec3b(255, 0, 0) : cv::Vec3b(0, 0, 255));
+}
+
+void EventDetector::createSAE_right_without_mc(double et_right, int ex_right, int ey_right, bool ep_right){
+
+      const int pol_right = ep_right ? 1 : 0;
+      const int pol_inv_right = (!ep_right) ? 1 : 0;
+      double & t_last_right = sae_latest_right[pol_right](ex_right,ey_right);
+      double & t_last_inv_right = sae_latest_right[pol_inv_right](ex_right, ey_right);
+
+      if ((et_right > t_last_right + filter_threshold_) || (t_last_inv_right > t_last_right) ) {
+        t_last_right = et_right;
+        sae_right[pol_right](ex_right, ey_right) = et_right;
+      } else {
+        t_last_right = et_right;
+      }
+
+      cur_event_mat_right_without_mc.at<cv::Vec3b>(cv::Point(ex_right, ey_right)) = (
             ep_right == true ? cv::Vec3b(255, 0, 0) : cv::Vec3b(0, 0, 255));
 }
 
